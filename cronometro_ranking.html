@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronómetro con Ranking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .cronometro {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .tiempo-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controles {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-iniciar {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-iniciar:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-pausar {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-pausar:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+        }
+
+        .btn-reiniciar {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-reiniciar:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .registro {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .registro h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .input-grupo {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-guardar {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+        }
+
+        .btn-guardar:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-guardar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ranking {
+            margin-top: 30px;
+        }
+
+        .ranking h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .participante {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .participante:hover {
+            transform: translateX(5px);
+        }
+
+        .posicion {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 40px;
+        }
+
+        .oro { color: #FFD700; }
+        .plata { color: #C0C0C0; }
+        .bronce { color: #CD7F32; }
+
+        .nombre {
+            flex: 1;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .tiempo {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .btn-eliminar {
+            background: #f44336;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .btn-eliminar:hover {
+            background: #da190b;
+        }
+
+        .vacio {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏱️ Cronómetro con Ranking</h1>
+        
+        <div class="cronometro">
+            <div class="tiempo-display" id="tiempoDisplay">00:00:00</div>
+            <div class="controles">
+                <button class="btn-iniciar" id="btnIniciar">▶ Iniciar</button>
+                <button class="btn-pausar" id="btnPausar" style="display:none;">⏸ Pausar</button>
+                <button class="btn-reiniciar" id="btnReiniciar">↻ Reiniciar</button>
+            </div>
+        </div>
+
+        <div class="registro">
+            <h3>Registrar Participante</h3>
+            <div class="input-grupo">
+                <input type="text" id="nombreInput" placeholder="Nombre del participante" maxlength="30">
+                <button class="btn-guardar" id="btnGuardar">💾 Guardar Tiempo</button>
+            </div>
+        </div>
+
+        <div class="ranking">
+            <h2>🏆 Ranking</h2>
+            <div id="listaRanking">
+                <div class="vacio">No hay participantes registrados</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tiempo = 0;
+        let intervalo = null;
+        let corriendo = false;
+        let participantes = [];
+
+        const tiempoDisplay = document.getElementById('tiempoDisplay');
+        const btnIniciar = document.getElementById('btnIniciar');
+        const btnPausar = document.getElementById('btnPausar');
+        const btnReiniciar = document.getElementById('btnReiniciar');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const nombreInput = document.getElementById('nombreInput');
+        const listaRanking = document.getElementById('listaRanking');
+
+        function formatearTiempo(ms) {
+            const horas = Math.floor(ms / 3600000);
+            const minutos = Math.floor((ms % 3600000) / 60000);
+            const segundos = Math.floor((ms % 60000) / 1000);
+            
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        }
+
+        function actualizarDisplay() {
+            tiempoDisplay.textContent = formatearTiempo(tiempo);
+        }
+
+        function iniciar() {
+            if (!corriendo) {
+                corriendo = true;
+                const inicio = Date.now() - tiempo;
+                
+                intervalo = setInterval(() => {
+                    tiempo = Date.now() - inicio;
+                    actualizarDisplay();
+                }, 10);
+
+                btnIniciar.style.display = 'none';
+                btnPausar.style.display = 'inline-block';
+            }
+        }
+
+        function pausar() {
+            if (corriendo) {
+                corriendo = false;
+                clearInterval(intervalo);
+                btnIniciar.style.display = 'inline-block';
+                btnPausar.style.display = 'none';
+            }
+        }
+
+        function reiniciar() {
+            pausar();
+            tiempo = 0;
+            actualizarDisplay();
+        }
+
+        function guardarTiempo() {
+            const nombre = nombreInput.value.trim();
+            
+            if (!nombre) {
+                alert('Por favor, escribe el nombre del participante');
+                return;
+            }
+
+            if (tiempo === 0) {
+                alert('El cronómetro debe estar en marcha o tener un tiempo registrado');
+                return;
+            }
+
+            participantes.push({
+                nombre: nombre,
+                tiempo: tiempo,
+                id: Date.now()
+            });
+
+            participantes.sort((a, b) => a.tiempo - b.tiempo);
+            
+            actualizarRanking();
+            nombreInput.value = '';
+            reiniciar();
+            
+            nombreInput.focus();
+        }
+
+        function eliminarParticipante(id) {
+            participantes = participantes.filter(p => p.id !== id);
+            actualizarRanking();
+        }
+
+        function actualizarRanking() {
+            if (participantes.length === 0) {
+                listaRanking.innerHTML = '<div class="vacio">No hay participantes registrados</div>';
+                return;
+            }
+
+            let html = '';
+            participantes.forEach((p, index) => {
+                let clasePos = '';
+                let medalla = '';
+                
+                if (index === 0) {
+                    clasePos = 'oro';
+                    medalla = '🥇';
+                } else if (index === 1) {
+                    clasePos = 'plata';
+                    medalla = '🥈';
+                } else if (index === 2) {
+                    clasePos = 'bronce';
+                    medalla = '🥉';
+                }
+
+                html += `
+                    <div class="participante">
+                        <span class="posicion ${clasePos}">${medalla || (index + 1)}</span>
+                        <span class="nombre">${p.nombre}</span>
+                        <span class="tiempo">${formatearTiempo(p.tiempo)}</span>
+                        <button class="btn-eliminar" onclick="eliminarParticipante(${p.id})">✕</button>
+                    </div>
+                `;
+            });
+
+            listaRanking.innerHTML = html;
+        }
+
+        btnIniciar.addEventListener('click', iniciar);
+        btnPausar.addEventListener('click', pausar);
+        btnReiniciar.addEventListener('click', reiniciar);
+        btnGuardar.addEventListener('click', guardarTiempo);
+        
+        nombreInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                guardarTiempo();
+            }
+        });
+    </script>
+</body>
+</html>
